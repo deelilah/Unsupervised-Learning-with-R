@@ -1,0 +1,311 @@
+#Problem Defination
+Kira Plastinina is a Russian brand that is sold through a defunct chain of retail stores in Russia, Ukraine, Kazakhstan, Belarus, China, Philippines, and Armenia. The brand’s Sales and Marketing team would like to understand their customer’s behavior from data that they have collected over the past year. More specifically, they would like to learn the characteristics of customer groups.
+
+#Data Sourcing
+[http://bit.ly/EcommerceCustomersDataset -This is where our data is collected from.
+
+
+#Check the Data
+
+#library importation.
+
+```{r}
+install.packages("readr", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
+install.packages("tidyverse")
+```
+```{r}
+library("tidyverse")
+```
+
+
+
+```{r}
+library(tidyverse)
+library(grid)
+library(devtools)
+
+```
+
+```{r}
+#loading the dataset
+data2=read.csv('http://bit.ly/EcommerceCustomersDataset')
+data2
+```
+
+```{r}
+head(data2)
+```
+
+```{r}
+#check datatypes
+str(data2)
+```
+
+```{r}
+
+# Changing the type of the loaded dataset to a dataframe
+data2= as.data.frame(data2)
+
+# Cleaning column names, by making them uniform
+colnames(data2) = tolower(colnames(data2))
+data2
+```
+```{r}
+
+# Previewing some statistical summaries of the dataset
+summary(data2)
+```
+
+```{r}
+
+# Checking the shape of the dataframe
+dim(data2)
+```
+```{r}
+# Checking for duplicated data
+anyDuplicated(data2)
+#our data has 159 duplicated values
+```
+
+```{r}
+#drop duplicates
+install.packages("dplyr")
+library(dplyr) 
+
+data2 = distinct(data2)
+
+# Ckecking whether the duplicates have been successfully dropped
+anyDuplicated(data2)
+```
+
+```{r}
+
+# Checking for missing values
+colSums(is.na(data2))
+```
+
+```{r}
+# Dropping missing values
+data2= na.omit(data2)
+```
+
+```{r}
+is.na(data2)
+```
+
+```{r}
+
+cat_cols = c('month', 'operatingsystems',	'browser',	'region',	'traffictype', 'visitortype')
+
+# Changing columns to factors
+for( i in cat_cols){
+   data2[,i] = as.factor(data2[,i])
+}
+
+```
+```{r}
+
+# Checking the structure of the cleaned dataframe
+str(data2)
+```
+
+```{r}
+#check for outliers
+install.packages("ggplot2")
+library("ggplot2")
+
+
+options(repr.plot.width = 11, repr.plot.height = 5)
+ggplot(data2, aes(month, productrelated, col = weekend)) + 
+  geom_boxplot() + 
+  labs(x = 'Month', y = 'Product related', title = 'Checking outliers in the product related feature') + 
+  theme(legend.position = 'top', legend.text = element_text(size = 10),
+       plot.title = element_text(size = 11, color = 'darkmagenta', face = 'bold'))
+```
+```{r}
+# Plotting boxplots to check for outliers
+options(repr.plot.width = 7, repr.plot.height = 5)
+ggplot(data2, aes(visitortype, productrelated, col = revenue)) + 
+  geom_boxplot() + 
+  labs(x = 'Visitor type', y = 'Product related', title = 'Checking outliers in the product related feature per visitor type') +
+  scale_color_brewer(palette = 'Set1') +
+  theme(legend.position = 'top',
+       plot.title = element_text(size = 11, color = 'darkmagenta', face ='bold'))
+```
+
+
+
+```{r}
+#check for outliers
+  boxplot(administrative~revenue,data=data2)
+```
+```{r}
+  boxplot(administrative_duration~revenue,data=data2)
+```
+```{r}
+ boxplot(informational_duration~revenue,data=data2)
+```
+```{r}
+ boxplot(productrelated~revenue,data=data2)
+```
+#DISTRIBUTION PLOTS
+```{r}
+# Plotting density plots to check for distributions
+options(repr.plot.width = 11, repr.plot.height = 5)
+p1 = ggplot(data2, aes(productrelated, col = revenue)) + 
+  geom_density(aes(fill = revenue), alpha = 0.4) + 
+  labs(x = 'Product related', y = 'Density', title = '') + 
+  theme(legend.position = 'none', 
+       plot.title = element_text(size = 12)) 
+p1
+```
+```{r}
+#univariate analysis
+hist(data2$administrative, 
+     main="Histogram for administrative", 
+     xlab="administrative", 
+     border="black", 
+     col="green")
+```
+
+```{r}
+hist(data2$productrelated, 
+     main="Histogram for productrelation", 
+     xlab=" productrelation", 
+     border="black", 
+     col="green")
+```
+```{r}
+hist(data2$bouncerates, 
+     main="Histogram for bouncerates ", 
+     xlab="bouncerates ", 
+     border="black", 
+     col="gold")
+```
+
+```{r}
+
+p2 = ggplot(data2, aes(bouncerates, col = revenue)) + 
+  geom_density(aes(fill = revenue), alpha = 0.4) + 
+  labs(x = 'Bouncerates', y = '', title = '') + 
+  theme(legend.position = 'top') 
+p2
+```
+```{r}
+p3 = ggplot(data2, aes(exitrates, col = revenue)) + 
+  geom_density(aes(fill = revenue), alpha = 0.4) + 
+  labs(x = 'exitrates', y = '', title = '') + 
+  theme(legend.position = 'none', 
+       plot.title = element_text(size = 12)) 
+p3
+```
+```{r}
+p4 = ggplot(data2, aes(exitrates , col = revenue)) + 
+  geom_density(aes(fill = revenue), alpha = 0.4) + 
+  labs(x = 'exitrates ', y = '', title = '') + 
+  theme(legend.position = 'top') 
+p4
+```
+
+#scatter plots
+
+```{r}
+library(ggplot2)
+options(repr.plot.width = 11, repr.plot.height = 5)
+
+p1 = ggplot(df, aes(productrelated, productrelated_duration, col = revenue)) + 
+    geom_point() + theme(legend.position = 'none') + 
+    labs(x='Product related', y ='Product related duration')
+p1
+```
+```{r}
+p2 = ggplot(data2, aes(administrative, administrative_duration, col = revenue)) +
+    geom_point() + theme(legend.position = 'none') +
+    labs(x = 'Administrative', y = 'Administrative duration')
+p2
+```
+
+```{r}
+p3 = ggplot(data2, aes(informational, informational_duration, col = revenue)) + 
+    geom_point() + theme(legend.position = 'none') + 
+    labs(x = 'Informational', y = 'Informational duration')
+p3
+```
+```{r}
+p4 = ggplot(data2, aes(pagevalues,	specialday	, col = revenue)) + geom_point() + theme(legend.position = 'none') +
+    labs(x = 'Page values', y = 'Special day')
+p4
+```
+```{r}
+p1 = ggplot(data2, aes(productrelated, productrelated_duration, col = revenue)) + 
+    geom_point() + theme(legend.position = 'none') + 
+    labs(x='Product related', y ='Product related duration')
+p1
+```
+#HEATMAP
+```{r}
+
+# Plotting a correlogram to check for correlations
+library(dplyr)
+install.packages("ggcorrplot")
+library(ggcorrplot)
+options(repr.plot.width = 4, repr.plot.height = 5)
+
+corr = round(cor(select_if(data2, is.numeric)), 2)
+ggcorrplot(corr, hc.order = T, ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"), lab = F)
+```
+#encode  categorical variables
+```{r}
+# Creating a copy of the cleaned dataframe
+non_dummy_df = data.table::copy(data2)
+
+# Encoding categorical variables
+month = data.frame(model.matrix(~0+data2$month))
+opr = data.frame(model.matrix(~0+data2$operatingsystems))
+brw = data.frame(model.matrix(~0+data2$browser))
+reg = data.frame(model.matrix(~0+data2$region))
+trf = data.frame(model.matrix(~0+data2$traffictype))
+vis = data.frame(model.matrix(~0+data2$visitortype))
+wkn = data.frame(model.matrix(~0+data2$weekend))
+rev = data.frame(model.matrix(~0+data2$revenue))
+
+# Dropping columns which have already encoded
+drop_cols = c('month', 'operatingsystems',	'browser',	'region',	'traffictype', 'visitortype', 'weekend', 'revenue')
+data2= select(data.frame(cbind(data2, month, opr, brw, reg, trf, vis, wkn, rev)), -drop_cols)
+```
+```{r}
+main_df = data.table::copy(data2)
+
+# Normalising the data
+data2 = as.data.frame(apply(data2, 2,  function(x) (x - min(x))/max(x) - min(x)))
+```
+
+```{r}
+# Performing clustering with the optimal number of clusters
+kmeans_res = kmeans(data2, 4)
+
+# Checking the cluster centers of each variable
+kmeans_res$centers
+```
+
+```{r}
+# Previewing the size of observations in each cluster
+kmeans_res$size
+```
+```{r}
+# Checking how some features have been clustered
+options(repr.plot.width = 11, repr.plot.height = 6)
+
+p1 = ggplot(data2, aes(productrelated, productrelated_duration, col = kmeans_res$cluster)) + 
+    geom_point() + theme(legend.position = 'none') + 
+    labs(x='Product related', y ='Product related duration')
+p1
+```
+```{r}
+p2 = ggplot(data2, aes(administrative, administrative_duration, col = kmeans_res$cluster)) +
+    geom_point() + theme(legend.position = 'none') +
+    labs(x = 'Administrative', y = 'Administrative duration')
+p2
+
+```
